@@ -22,10 +22,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.prompt-database.rule=PathPrefix(`/prompt-database`)"
       - "traefik.http.routers.prompt-database.entrypoints=web"
+      - "traefik.http.routers.prompt-database.priority=10"
       - "traefik.http.services.prompt-database.loadbalancer.server.port=3000"
-      # Strip prefix voor Next.js basePath
-      - "traefik.http.middlewares.prompt-database-stripprefix.stripprefix.prefixes=/prompt-database"
-      - "traefik.http.routers.prompt-database.middlewares=prompt-database-stripprefix"
+      # Strip prefix NIET - Next.js basePath handelt dit zelf af
+      # - "traefik.http.middlewares.prompt-database-stripprefix.stripprefix.prefixes=/prompt-database"
+      # - "traefik.http.routers.prompt-database.middlewares=prompt-database-stripprefix"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/prompt-database/api/prompts"]
       interval: 30s
