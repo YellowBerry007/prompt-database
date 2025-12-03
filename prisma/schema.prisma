@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite doesn't support enums, so we use String with @default
+model Prompt {
+  id            String       @id @default(cuid())
+  title         String
+  description   String?
+  body          String
+  type          String       @default("USER") // SYSTEM, USER, TOOL
+  platform      String       @default("CURSOR") // CHATGPT, CURSOR, MIDJOURNEY, SUNO, OTHER
+  modelHint     String?
+  language      String       @default("en")
+  useCase       String
+  clientOrProject String?
+  status        String       @default("DRAFT") // DRAFT, TESTED, PRODUCTION
+  isFavorite    Boolean      @default(false)
+  version       Int          @default(1)
+  changelog     String?
+  notes         String?
+  usageCount    Int          @default(0)
+  lastUsedAt    DateTime?
+  categoryId    String?
+  category      Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags          PromptTag[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([platform])
+  @@index([isFavorite])
+  @@index([language])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  parentId    String?
+  parent      Category? @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[] @relation("CategoryTree")
+  sortOrder   Int       @default(0)
+  prompts     Prompt[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([parentId])
+  @@index([slug])
+}
+
+model Tag {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  slug      String      @unique
+  prompts   PromptTag[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([slug])
+}
+
+model PromptTag {
+  promptId  String
+  prompt    Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([promptId, tagId])
+  @@index([promptId])
+  @@index([tagId])
+}
+
