@@ -20,18 +20,15 @@ services:
     labels:
       # Traefik labels voor routing
       - "traefik.enable=true"
-      # HTTP router (laagste prioriteit, redirect naar HTTPS)
-      - "traefik.http.routers.prompt-database-http.rule=PathPrefix(`/prompt-database`)"
-      - "traefik.http.routers.prompt-database-http.entrypoints=web"
-      - "traefik.http.routers.prompt-database-http.priority=1"
-      - "traefik.http.routers.prompt-database-http.middlewares=redirect-to-https"
-      # HTTPS router (hoofd router)
-      - "traefik.http.routers.prompt-database.rule=PathPrefix(`/prompt-database`)"
-      - "traefik.http.routers.prompt-database.entrypoints=websecure"
-      - "traefik.http.routers.prompt-database.priority=10"
-      - "traefik.http.routers.prompt-database.tls=true"
+      # HTTP router
+      - "traefik.http.routers.prompt-db.rule=PathPrefix(`/prompt-database`)"
+      - "traefik.http.routers.prompt-db.entrypoints=web"
+      # HTTPS router  
+      - "traefik.http.routers.prompt-db-secure.rule=PathPrefix(`/prompt-database`)"
+      - "traefik.http.routers.prompt-db-secure.entrypoints=websecure"
+      - "traefik.http.routers.prompt-db-secure.tls=true"
       # Service configuratie
-      - "traefik.http.services.prompt-database.loadbalancer.server.port=3000"
+      - "traefik.http.services.prompt-db.loadbalancer.server.port=3000"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/prompt-database/api/prompts"]
       interval: 30s
