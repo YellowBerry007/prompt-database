@@ -35,7 +35,8 @@ export function PromptList({ prompts }: PromptListProps) {
     try {
       await navigator.clipboard.writeText(body)
       // Track usage
-      await fetch(`/api/prompts/${id}/usage`, { method: "PATCH" })
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      await fetch(`${basePath}/api/prompts/${id}/usage`, { method: "PATCH" })
     } catch (error) {
       console.error("Failed to copy:", error)
     }

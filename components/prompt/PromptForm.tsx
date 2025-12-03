@@ -108,7 +108,8 @@ export function PromptForm({ prompt, categories, tags }: PromptFormProps) {
         categoryId: formData.categoryId,
       }
 
-      const url = prompt ? `/api/prompts/${prompt.id}` : "/api/prompts"
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const url = prompt ? `${basePath}/api/prompts/${prompt.id}` : `${basePath}/api/prompts`
       const method = prompt ? "PUT" : "POST"
 
       const response = await fetch(url, {
@@ -148,7 +149,8 @@ export function PromptForm({ prompt, categories, tags }: PromptFormProps) {
         categoryId: formData.categoryId,
       }
 
-      const response = await fetch("/api/prompts", {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/prompts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -175,7 +177,8 @@ export function PromptForm({ prompt, categories, tags }: PromptFormProps) {
     try {
       await navigator.clipboard.writeText(formData.body)
       if (prompt) {
-        await fetch(`/api/prompts/${prompt.id}/usage`, { method: "PATCH" })
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+        await fetch(`${basePath}/api/prompts/${prompt.id}/usage`, { method: "PATCH" })
       }
       alert("Copied to clipboard!")
     } catch (error) {
@@ -190,7 +193,8 @@ export function PromptForm({ prompt, categories, tags }: PromptFormProps) {
 
     setLoading(true)
     try {
-      const response = await fetch(`/api/prompts/${prompt.id}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/prompts/${prompt.id}`, {
         method: "DELETE",
       })
 

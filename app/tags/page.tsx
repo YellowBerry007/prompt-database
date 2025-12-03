@@ -43,7 +43,8 @@ export default function TagsPage() {
 
   const fetchTags = async () => {
     try {
-      const res = await fetch("/api/tags")
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const res = await fetch(`${basePath}/api/tags`)
       const data = await res.json()
       setTags(data)
     } catch (error) {
@@ -58,7 +59,8 @@ export default function TagsPage() {
     setLoading(true)
 
     try {
-      const url = editingTag ? `/api/tags/${editingTag.id}` : "/api/tags"
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const url = editingTag ? `${basePath}/api/tags/${editingTag.id}` : `${basePath}/api/tags`
       const method = editingTag ? "PUT" : "POST"
 
       const response = await fetch(url, {
@@ -91,7 +93,8 @@ export default function TagsPage() {
     if (!confirm("Are you sure you want to delete this tag?")) return
 
     try {
-      const response = await fetch(`/api/tags/${id}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/tags/${id}`, {
         method: "DELETE",
       })
 

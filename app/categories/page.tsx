@@ -59,7 +59,8 @@ export default function CategoriesPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/categories")
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const res = await fetch(`${basePath}/api/categories`)
       const data = await res.json()
       setCategories(data)
     } catch (error) {
@@ -90,9 +91,10 @@ export default function CategoriesPage() {
         payload.parentId = formData.parentId
       }
 
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
       const url = editingCategory
-        ? `/api/categories/${editingCategory.id}`
-        : "/api/categories"
+        ? `${basePath}/api/categories/${editingCategory.id}`
+        : `${basePath}/api/categories`
       const method = editingCategory ? "PUT" : "POST"
 
       const response = await fetch(url, {
@@ -125,7 +127,8 @@ export default function CategoriesPage() {
     if (!confirm("Are you sure you want to delete this category?")) return
 
     try {
-      const response = await fetch(`/api/categories/${id}`, {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/categories/${id}`, {
         method: "DELETE",
       })
 

@@ -32,7 +32,8 @@ export function Topbar() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/export/prompts")
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/export/prompts`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -55,7 +56,8 @@ export function Topbar() {
       const text = await importFile.text()
       const data = JSON.parse(text)
 
-      const response = await fetch("/api/import/prompts", {
+      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/prompt-database'
+      const response = await fetch(`${basePath}/api/import/prompts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
