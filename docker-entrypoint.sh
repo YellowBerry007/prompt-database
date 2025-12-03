@@ -1,22 +1,26 @@
 #!/bin/sh
 set -e
 
-# Ensure data directory exists and has correct permissions
+# Ensure data directory exists
 mkdir -p /app/data
-chown -R nextjs:nodejs /app/data || true
-
-# Fix permissions for Prisma engines
-chown -R nextjs:nodejs /app/node_modules/@prisma 2>/dev/null || true
-chmod -R u+w /app/node_modules/@prisma 2>/dev/null || true
 
 # Initialize database if it doesn't exist
+# Run as root first to ensure we can write, then fix permissions
 if [ ! -f /app/data/prod.db ]; then
   echo "Initializing database..."
-  # Run as nextjs user
-  su-exec nextjs npx prisma db push --skip-generate || echo "Database initialization completed"
+  # Run prisma as root to avoid permission issues
+  npx prisma db push --skip-generate || echo "Database initialization completed"
+  # Fix ownership after creation
+  chown -R nextjs:nodejs /app/data 2>/dev/null || true
 fi
 
-# Start the application
-exec "$@"
+# Switch to nextjs user for running the app
+if [ "$(id -u)" = "0" ]; then
+  # If running as root, switch to nextjs user
+  exec su-exec nextjs "$@"
+else
+  # Already running as nextjs or other user
+  exec "$@"
+fi
 
 
