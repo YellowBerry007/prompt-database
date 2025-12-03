@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: prompt-database
     ports:
-      - "3000:3000"  # Alleen intern, nginx gebruikt deze
+      - "3000:3000"  # Alleen intern, Traefik gebruikt deze
     environment:
       - DATABASE_URL=file:/app/data/prod.db
       - NODE_ENV=production
@@ -15,7 +15,17 @@ services:
       - ./data:/app/data
     restart: unless-stopped
     networks:
+      - web  # Gebruik hetzelfde netwerk als Traefik
       - prompt-network
+    labels:
+      # Traefik labels voor routing
+      - "traefik.enable=true"
+      - "traefik.http.routers.prompt-database.rule=PathPrefix(`/prompt-database`)"
+      - "traefik.http.routers.prompt-database.entrypoints=web"
+      - "traefik.http.services.prompt-database.loadbalancer.server.port=3000"
+      # Strip prefix voor Next.js basePath
+      - "traefik.http.middlewares.prompt-database-stripprefix.stripprefix.prefixes=/prompt-database"
+      - "traefik.http.routers.prompt-database.middlewares=prompt-database-stripprefix"
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/prompt-database/api/prompts"]
       interval: 30s
@@ -24,5 +34,7 @@ services:
       start_period: 40s
 
 networks:
+  web:
+    external: true  # Gebruik bestaand Traefik netwerk
   prompt-network:
     driver: bridge
