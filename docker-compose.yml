@@ -20,14 +20,16 @@ services:
     labels:
       # Traefik labels voor routing
       - "traefik.enable=true"
-      # HTTP router
+      # HTTP router (laagste prioriteit, redirect naar HTTPS)
+      - "traefik.http.routers.prompt-database-http.rule=PathPrefix(`/prompt-database`)"
+      - "traefik.http.routers.prompt-database-http.entrypoints=web"
+      - "traefik.http.routers.prompt-database-http.priority=1"
+      - "traefik.http.routers.prompt-database-http.middlewares=redirect-to-https"
+      # HTTPS router (hoofd router)
       - "traefik.http.routers.prompt-database.rule=PathPrefix(`/prompt-database`)"
-      - "traefik.http.routers.prompt-database.entrypoints=web"
+      - "traefik.http.routers.prompt-database.entrypoints=websecure"
       - "traefik.http.routers.prompt-database.priority=10"
-      # HTTPS router
-      - "traefik.http.routers.prompt-database-secure.rule=PathPrefix(`/prompt-database`)"
-      - "traefik.http.routers.prompt-database-secure.entrypoints=websecure"
-      - "traefik.http.routers.prompt-database-secure.priority=10"
+      - "traefik.http.routers.prompt-database.tls=true"
       # Service configuratie
       - "traefik.http.services.prompt-database.loadbalancer.server.port=3000"
     healthcheck:
