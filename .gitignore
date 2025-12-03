@@ -44,3 +44,9 @@ next-env.d.ts
 /data
 *.db
 *.db-journal
+
+# ssh keys
+.ssh/
+*.pem
+*_key
+*_key.pub

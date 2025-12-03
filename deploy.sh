@@ -8,7 +8,8 @@ set -e
 SERVER="root@46.224.72.129"
 REMOTE_REPO="/opt/prompt-database"
 APP_DIR="/opt/prompt-database-app"
-SSH_KEY=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SSH_KEY="${SCRIPT_DIR}/.ssh/hertzner_key"
 
 # Parse arguments
 for arg in "$@"; do
@@ -26,22 +27,21 @@ for arg in "$@"; do
     esac
 done
 
-# SSH command met key als die is opgegeven
-if [ -n "$SSH_KEY" ]; then
-    SSH_CMD="ssh -i $SSH_KEY -o StrictHostKeyChecking=no"
-else
-    SSH_CMD="ssh -o StrictHostKeyChecking=no"
+# Check of SSH key bestaat
+if [ ! -f "$SSH_KEY" ]; then
+    echo "❌ SSH key niet gevonden op: $SSH_KEY"
+    echo "   Gebruik --key=/path/to/key om een andere key te specificeren"
+    exit 1
 fi
+
+# SSH command met key
+SSH_CMD="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o IdentitiesOnly=yes"
 
 echo "🚀 Deploying naar Hertzner server..."
 
 # Push naar remote repository
 echo "📤 Pushing code naar server..."
-if [ -n "$SSH_KEY" ]; then
-    GIT_SSH_COMMAND="ssh -i $SSH_KEY -o StrictHostKeyChecking=no" git push hertzner main
-else
-    git push hertzner main
-fi
+GIT_SSH_COMMAND="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o IdentitiesOnly=yes" git push hertzner main
 
 # Pull en update op de server
 echo "🔄 Updating applicatie op server..."

@@ -54,6 +54,13 @@ RUN chmod +x ./docker-entrypoint.sh
 # Create data directory for database with proper permissions
 RUN mkdir -p /app/data
 
+# Install su-exec for user switching in entrypoint
+RUN apk add --no-cache su-exec
+
+# Fix permissions for node_modules (especially Prisma engines)
+RUN chown -R nextjs:nodejs /app/node_modules || true
+RUN chmod -R u+w /app/node_modules/@prisma 2>/dev/null || true
+
 USER nextjs
 
 EXPOSE 3000
