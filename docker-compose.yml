@@ -5,18 +5,24 @@ services:
       dockerfile: Dockerfile
     container_name: prompt-database
     ports:
-      - "3300:3000"
+      - "3000:3000"  # Alleen intern, nginx gebruikt deze
     environment:
       - DATABASE_URL=file:/app/data/prod.db
       - NODE_ENV=production
-      - NEXT_PUBLIC_BASE_URL=http://localhost:3300
+      - NEXT_PUBLIC_BASE_PATH=/prompt-database
     volumes:
       # Persist database
       - ./data:/app/data
     restart: unless-stopped
+    networks:
+      - prompt-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/prompts"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/prompt-database/api/prompts"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+networks:
+  prompt-network:
+    driver: bridge
